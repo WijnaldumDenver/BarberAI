@@ -1,0 +1,79 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getStyleConsultation } from "@/lib/anthropic";
+import { PLAN_LIMITS } from "@/lib/constants";
+import { consultSchema } from "@/lib/validations";
+import type { ApiError, ApiSuccess, ConsultResponse } from "@/lib/types";
+
+export const runtime = "nodejs";
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json<ApiError>({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const parsed = consultSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json<ApiError>({ error: parsed.error.errors[0].message }, { status: 400 });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, ai_requests_today, ai_requests_reset_at")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return NextResponse.json<ApiError>({ error: "Profile not found" }, { status: 404 });
+  }
+
+  const limit = PLAN_LIMITS[profile.plan as keyof typeof PLAN_LIMITS].aiPerDay;
+  const today = new Date().toISOString().split("T")[0];
+  let requestsToday = profile.ai_requests_today;
+
+  if (profile.ai_requests_reset_at < today) {
+    requestsToday = 0;
+    await supabase
+      .from("profiles")
+      .update({ ai_requests_today: 0, ai_requests_reset_at: today })
+      .eq("id", user.id);
+  }
+
+  if (requestsToday >= limit) {
+    return NextResponse.json<ApiError>({ error: "Daily limit reached" }, { status: 429 });
+  }
+
+  const { desiredStyle, faceShape, occasion } = parsed.data;
+  let userPrompt = `Desired style: ${desiredStyle}`;
+  if (faceShape) userPrompt += `\nFace shape: ${faceShape}`;
+  if (occasion) userPrompt += `\nOccasion: ${occasion}`;
+
+  try {
+    const response = await getStyleConsultation(userPrompt);
+
+    await supabase.from("ai_consultations").insert({
+      user_id: user.id,
+      prompt: desiredStyle,
+      response,
+    });
+
+    await supabase
+      .from("profiles")
+      .update({ ai_requests_today: requestsToday + 1 })
+      .eq("id", user.id);
+
+    return NextResponse.json<ApiSuccess<ConsultResponse>>({
+      data: {
+        id: crypto.randomUUID(),
+        response,
+        remaining: limit - requestsToday - 1,
+      },
+    });
+  } catch {
+    return NextResponse.json<ApiError>({ error: "AI consultation failed" }, { status: 500 });
+  }
+}
