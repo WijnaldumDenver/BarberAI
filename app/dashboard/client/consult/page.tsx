@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ConsultPageClient } from "@/components/ai/ConsultPageClient";
 import { createClient } from "@/lib/supabase/server";
@@ -21,6 +22,10 @@ export default async function ConsultPage() {
 
   const limit = PLAN_LIMITS[(profile?.plan ?? "free") as keyof typeof PLAN_LIMITS].aiPerDay;
   const remaining = Math.max(0, limit - requestsToday);
+
+  if (remaining <= 0) {
+    redirect("/pricing?reason=ai-limit");
+  }
 
   const { data: consultations } = await supabase
     .from("ai_consultations")

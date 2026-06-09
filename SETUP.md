@@ -25,12 +25,13 @@ Follow these steps once to get BarberAI running locally and deployed. No coding 
 
 ---
 
-## Step 2: Anthropic (AI Consultations)
+## Step 2: Google AI Studio (AI Consultations)
 
-1. Go to [console.anthropic.com](https://console.anthropic.com).
-2. Create an account and add a payment method (pay-as-you-go; Haiku is very cheap).
-3. Go to **API Keys → Create Key**.
-4. Copy the key → `ANTHROPIC_API_KEY`.
+1. Go to [aistudio.google.com](https://aistudio.google.com) and sign in with your Google account.
+2. Click **Get API key** (top right) → **Create API key**.
+3. Copy the key → `GEMINI_API_KEY`.
+
+> Free tier includes Gemini Flash models with daily rate limits — no credit card required.
 
 ---
 
@@ -116,7 +117,7 @@ pnpm dev
 | Problem | Solution |
 |---------|----------|
 | Signup fails | Check SQL migration ran successfully in Supabase |
-| AI consult returns 500 | Verify `ANTHROPIC_API_KEY` is set |
+| AI consult returns 500 | Verify `GEMINI_API_KEY` is set in Vercel and locally |
 | Stripe checkout fails | Ensure test mode keys and valid `STRIPE_PRO_PRICE_ID` |
 | No time slots when booking | Barber must set availability first |
 | Webhook not updating plan | Check webhook URL and `STRIPE_WEBHOOK_SECRET` in Vercel |

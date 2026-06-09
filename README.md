@@ -9,7 +9,7 @@ BarberAI is an AI-powered barbershop booking and style consultation platform. Cl
 ## Features
 
 - **Smart booking** — Browse barbers, pick a service, choose a time slot, and confirm
-- **AI style consultation** — Get Claude-powered style advice with "what to tell your barber" wording
+- **AI style consultation** — Get Gemini-powered style advice with "what to tell your barber" wording
 - **Barber dashboard** — Manage services, availability, and today's appointments
 - **Role-based auth** — Separate client and barber experiences via Supabase Auth
 - **Stripe subscriptions** — Pro plan upgrade (test mode only)
@@ -23,7 +23,7 @@ BarberAI is an AI-powered barbershop booking and style consultation platform. Cl
 | Language | [TypeScript](https://www.typescriptlang.org/) (strict) |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | Database + Auth | [Supabase](https://supabase.com/) |
-| AI | [Anthropic Claude Haiku](https://www.anthropic.com/) |
+| AI | [Google Gemini Flash](https://aistudio.google.com/) (free tier) |
 | Payments | [Stripe](https://stripe.com/) (test mode) |
 | Images | [Cloudinary](https://cloudinary.com/) |
 | State | [Zustand](https://zustand.docs.pmnd.rs/) + [React Query](https://tanstack.com/query) |
@@ -43,13 +43,13 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> See [SETUP.md](./SETUP.md) for step-by-step account creation (Supabase, Anthropic, Stripe, Cloudinary).
+> See [SETUP.md](./SETUP.md) for step-by-step account creation (Supabase, Google AI Studio, Stripe, Cloudinary).
 
 ## Architecture Decisions
 
 **Why Supabase?** Single platform for PostgreSQL, auth, and row-level security — free tier covers a portfolio project with zero backend code to maintain.
 
-**Why Claude Haiku?** Cheapest Anthropic model (`claude-haiku-3-5-20251001`) with fast responses under 500 tokens. Daily limits (5 free / 50 pro) keep API costs near zero.
+**Why Gemini Flash?** Google AI Studio's free tier (`gemini-2.5-flash`) requires no credit card and handles short consultations well. App-level daily limits (5 free / 50 pro) keep usage predictable.
 
 **Why Cloudinary over Supabase Storage?** Supabase free tier has 1 GB storage; Cloudinary's separate 1 GB free tier is reserved for avatar uploads only, keeping the database storage budget intact.
 
@@ -61,18 +61,18 @@ Open [http://localhost:3000](http://localhost:3000).
 |---------|-----------|-------|
 | Vercel | 100 GB bandwidth, serverless functions | Hosting + API routes |
 | Supabase | 500 MB DB, 50k MAU, auth emails | Database, auth, RLS |
-| Anthropic Haiku | Pay-per-use (~$0.001/consult) | Capped at 5–50/day per user |
+| Google AI Studio | Free tier (Gemini Flash) | Capped at 5–50/day per user in-app |
 | Stripe | Test mode | No real charges |
 | Cloudinary | 1 GB storage, 25 credits/month | Avatar uploads only |
 
-**Total running cost: $0** on free tiers. Anthropic charges only if you exceed their free credits (minimal at Haiku rates with daily caps).
+**Total running cost: $0** on free tiers.
 
 ## Project Structure
 
 ```
 app/                  → Pages and API routes
 components/           → UI and feature components
-lib/                  → Supabase, Stripe, Anthropic, utilities
+lib/                  → Supabase, Stripe, Gemini, utilities
 supabase/migrations/  → Database schema SQL
 ```
 

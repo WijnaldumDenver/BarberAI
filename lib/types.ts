@@ -80,6 +80,7 @@ export interface BookingWithDetails extends Booking {
 
 export interface ApiError {
   error: string;
+  code?: "LIMIT_REACHED";
 }
 
 export interface ApiSuccess<T> {

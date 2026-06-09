@@ -3,7 +3,7 @@ export const PLAN_LIMITS = {
   pro: { aiPerDay: 50, bookingsPerMonth: Infinity },
 } as const;
 
-export const CLAUDE_MODEL = "claude-haiku-3-5-20251001" as const;
+export const GEMINI_MODEL = "gemini-2.5-flash" as const;
 
 export const BOOKING_STATUSES = [
   "pending",

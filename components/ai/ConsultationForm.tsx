@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ interface ConsultationFormProps {
 }
 
 export function ConsultationForm({ onResult, remaining }: ConsultationFormProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const form = useForm<ConsultInput>({
     resolver: zodResolver(consultSchema),
@@ -32,10 +34,17 @@ export function ConsultationForm({ onResult, remaining }: ConsultationFormProps)
         body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Consultation failed");
+      if (!res.ok) {
+        if (res.status === 429 || json.code === "LIMIT_REACHED") {
+          router.push("/pricing?reason=ai-limit");
+          return null;
+        }
+        throw new Error(json.error ?? "Consultation failed");
+      }
       return json.data as ConsultResponse;
     },
     onSuccess: (data) => {
+      if (!data) return;
       onResult(data);
       form.reset();
     },

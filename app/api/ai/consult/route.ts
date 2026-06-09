@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getStyleConsultation } from "@/lib/anthropic";
+import { getAiServiceErrorMessage, getStyleConsultation } from "@/lib/gemini";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { consultSchema } from "@/lib/validations";
 import type { ApiError, ApiSuccess, ConsultResponse } from "@/lib/types";
@@ -44,7 +44,17 @@ export async function POST(request: Request) {
   }
 
   if (requestsToday >= limit) {
-    return NextResponse.json<ApiError>({ error: "Daily limit reached" }, { status: 429 });
+    return NextResponse.json<ApiError>(
+      { error: "Daily limit reached", code: "LIMIT_REACHED" },
+      { status: 429 }
+    );
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json<ApiError>(
+      { error: "AI service is not configured. Please contact support." },
+      { status: 503 }
+    );
   }
 
   const { desiredStyle, faceShape, occasion } = parsed.data;
@@ -73,7 +83,11 @@ export async function POST(request: Request) {
         remaining: limit - requestsToday - 1,
       },
     });
-  } catch {
-    return NextResponse.json<ApiError>({ error: "AI consultation failed" }, { status: 500 });
+  } catch (error) {
+    console.error("AI consultation error:", error);
+    return NextResponse.json<ApiError>(
+      { error: getAiServiceErrorMessage(error) },
+      { status: 500 }
+    );
   }
 }

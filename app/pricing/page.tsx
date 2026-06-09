@@ -20,11 +20,22 @@ const proFeatures = [
   "Custom branding",
 ];
 
-export default function PricingPage() {
+export default function PricingPage({
+  searchParams,
+}: {
+  searchParams?: { reason?: string };
+}) {
+  const hitAiLimit = searchParams?.reason === "ai-limit";
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-16">
+        {hitAiLimit && (
+          <div className="max-w-4xl mx-auto mb-8 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-center text-sm">
+            You&apos;ve used all your AI consultations for today. Upgrade to Pro for 50 per day.
+          </div>
+        )}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Simple, transparent pricing</h1>
           <p className="text-muted-foreground">Start free. Upgrade when you&apos;re ready to grow.</p>
