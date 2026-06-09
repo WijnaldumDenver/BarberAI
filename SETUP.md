@@ -117,7 +117,7 @@ pnpm dev
 | Problem | Solution |
 |---------|----------|
 | Signup fails | Check SQL migration ran successfully in Supabase |
-| AI consult returns 500 | Verify `GEMINI_API_KEY` is set in Vercel and locally |
+| AI consult returns 500 | Verify `GEMINI_API_KEY` is set in Vercel (not `ANTHROPIC_API_KEY`) and redeploy |
 | Stripe checkout fails | Ensure test mode keys and valid `STRIPE_PRO_PRICE_ID` |
 | No time slots when booking | Barber must set availability first |
 | Webhook not updating plan | Check webhook URL and `STRIPE_WEBHOOK_SECRET` in Vercel |

@@ -49,7 +49,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 **Why Supabase?** Single platform for PostgreSQL, auth, and row-level security — free tier covers a portfolio project with zero backend code to maintain.
 
-**Why Gemini Flash?** Google AI Studio's free tier (`gemini-2.5-flash`) requires no credit card and handles short consultations well. App-level daily limits (5 free / 50 pro) keep usage predictable.
+**Why Gemini Flash Lite?** Google AI Studio's free tier (`gemini-2.5-flash-lite`) requires no credit card and handles short consultations well. App-level daily limits (5 free / 50 pro) keep usage predictable.
 
 **Why Cloudinary over Supabase Storage?** Supabase free tier has 1 GB storage; Cloudinary's separate 1 GB free tier is reserved for avatar uploads only, keeping the database storage budget intact.
 

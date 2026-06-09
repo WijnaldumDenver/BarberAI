@@ -30,7 +30,9 @@ export function getAiServiceErrorMessage(error: unknown): string {
   if (
     message.includes("RESOURCE_EXHAUSTED") ||
     message.includes("quota") ||
-    message.includes("rate limit")
+    message.includes("rate limit") ||
+    message.includes("UNAVAILABLE") ||
+    message.includes("high demand")
   ) {
     return "AI service is temporarily unavailable. Please try again later.";
   }
@@ -43,7 +45,27 @@ export function getAiServiceErrorMessage(error: unknown): string {
     return "AI service is not configured correctly. Please contact support.";
   }
 
+  if (message.includes("Empty response from Gemini")) {
+    return "AI service returned an empty response. Please try again.";
+  }
+
   return "AI consultation failed. Please try again later.";
+}
+
+function extractResponseText(
+  response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>
+): string {
+  const text = response.text?.trim();
+  if (text) return text;
+
+  const parts = response.candidates?.[0]?.content?.parts ?? [];
+  const fromParts = parts
+    .map((part) => ("text" in part ? part.text : undefined))
+    .filter((value): value is string => Boolean(value))
+    .join("")
+    .trim();
+
+  return fromParts;
 }
 
 export async function getStyleConsultation(userPrompt: string): Promise<string> {
@@ -52,11 +74,12 @@ export async function getStyleConsultation(userPrompt: string): Promise<string> 
     contents: userPrompt,
     config: {
       systemInstruction: SYSTEM_PROMPT,
-      maxOutputTokens: 500,
+      maxOutputTokens: 1024,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
-  const text = response.text;
+  const text = extractResponseText(response);
   if (!text) {
     throw new Error("Empty response from Gemini");
   }
