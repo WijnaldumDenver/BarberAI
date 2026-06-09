@@ -1,15 +1,24 @@
 "use client";
 
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ConsultationResultProps {
   response: string;
   loading?: boolean;
+  recommendedBarberId?: string | null;
+  recommendedBarberName?: string | null;
 }
 
-export function ConsultationResult({ response, loading }: ConsultationResultProps) {
+export function ConsultationResult({
+  response,
+  loading,
+  recommendedBarberId,
+  recommendedBarberName,
+}: ConsultationResultProps) {
   if (loading) {
     return (
       <Card>
@@ -33,8 +42,17 @@ export function ConsultationResult({ response, loading }: ConsultationResultProp
       <CardHeader>
         <CardTitle>Your style recommendation</CardTitle>
       </CardHeader>
-      <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-        <ReactMarkdown>{response}</ReactMarkdown>
+      <CardContent className="space-y-4">
+        <div className="prose prose-sm max-w-none dark:prose-invert">
+          <ReactMarkdown>{response}</ReactMarkdown>
+        </div>
+        {recommendedBarberId && recommendedBarberName && (
+          <Button asChild>
+            <Link href={`/dashboard/client/book/${recommendedBarberId}`}>
+              Book {recommendedBarberName}
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

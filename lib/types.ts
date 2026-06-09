@@ -91,6 +91,8 @@ export interface ConsultResponse {
   id: string;
   response: string;
   remaining: number;
+  recommendedBarberId?: string | null;
+  recommendedBarberName?: string | null;
 }
 
 export interface CheckoutResponse {

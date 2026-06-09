@@ -11,9 +11,75 @@ function getGemini(): GoogleGenAI {
 }
 
 export const SYSTEM_PROMPT = `You are BarberAI, an expert hair style consultant for barbershops.
-Give practical, specific advice. Always end with a "What to tell your barber" section
-with exact wording the client can use. Keep responses under 300 words.
-Format with clear sections using markdown.`;
+Keep every response under 120 words. Be direct — no filler, no long lists.
+
+Use exactly these markdown sections:
+
+## Style tip
+1-2 short sentences on the best cut or approach.
+
+## Best barber for you
+Recommend ONE barber from the provided list using their exact shop name.
+Explain in 1-2 sentences why they are the best match (specialty, services, bio).
+If no barbers are listed, say they can browse barbers on the site and skip the ID line below.
+
+## Tell your barber
+One short sentence the client can quote at the chair.
+
+After the sections, on its own final line, output:
+RECOMMENDED_BARBER_ID: <barber id from the list, or "none">`;
+
+export interface BarberConsultContext {
+  id: string;
+  shopName: string;
+  barberName: string | null;
+  bio: string | null;
+  location: string | null;
+  services: Array<{ name: string; description: string | null }>;
+}
+
+export function formatBarbersForPrompt(barbers: BarberConsultContext[]): string {
+  if (barbers.length === 0) {
+    return "Available barbers: none listed.";
+  }
+
+  const lines = barbers.map((barber) => {
+    const services = barber.services
+      .map((s) => {
+        const desc = s.description ? ` — ${s.description}` : "";
+        return `${s.name}${desc}`;
+      })
+      .join("; ");
+
+    return [
+      `- ID: ${barber.id}`,
+      `  Shop: ${barber.shopName}`,
+      barber.barberName ? `  Barber: ${barber.barberName}` : null,
+      barber.location ? `  Location: ${barber.location}` : null,
+      barber.bio ? `  Bio: ${barber.bio}` : null,
+      services ? `  Services: ${services}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  });
+
+  return `Available barbers:\n${lines.join("\n")}`;
+}
+
+export function parseRecommendedBarberId(response: string): {
+  text: string;
+  barberId: string | null;
+} {
+  const match = response.match(/RECOMMENDED_BARBER_ID:\s*([a-f0-9-]+|none)\s*$/im);
+  if (!match) {
+    return { text: response.trim(), barberId: null };
+  }
+
+  const barberId = match[1].toLowerCase() === "none" ? null : match[1];
+  const text = response.replace(/\n?RECOMMENDED_BARBER_ID:\s*(?:[a-f0-9-]+|none)\s*$/im, "").trim();
+
+  return { text, barberId };
+}
 
 export function getAiServiceErrorMessage(error: unknown): string {
   if (!process.env.GEMINI_API_KEY) {
@@ -68,13 +134,18 @@ function extractResponseText(
   return fromParts;
 }
 
-export async function getStyleConsultation(userPrompt: string): Promise<string> {
+export async function getStyleConsultation(
+  userPrompt: string,
+  barberContext: BarberConsultContext[]
+): Promise<string> {
+  const fullPrompt = `${userPrompt}\n\n${formatBarbersForPrompt(barberContext)}`;
+
   const response = await getGemini().models.generateContent({
     model: GEMINI_MODEL,
-    contents: userPrompt,
+    contents: fullPrompt,
     config: {
       systemInstruction: SYSTEM_PROMPT,
-      maxOutputTokens: 1024,
+      maxOutputTokens: 512,
       thinkingConfig: { thinkingBudget: 0 },
     },
   });

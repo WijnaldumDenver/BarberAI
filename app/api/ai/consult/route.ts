@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAiServiceErrorMessage, getStyleConsultation } from "@/lib/gemini";
+import {
+  getAiServiceErrorMessage,
+  getStyleConsultation,
+  parseRecommendedBarberId,
+  type BarberConsultContext,
+} from "@/lib/gemini";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { consultSchema } from "@/lib/validations";
 import type { ApiError, ApiSuccess, ConsultResponse } from "@/lib/types";
@@ -62,8 +67,38 @@ export async function POST(request: Request) {
   if (faceShape) userPrompt += `\nFace shape: ${faceShape}`;
   if (occasion) userPrompt += `\nOccasion: ${occasion}`;
 
+  const { data: barbers } = await supabase
+    .from("barbers")
+    .select(`
+      id,
+      shop_name,
+      bio,
+      location,
+      profiles!barbers_user_id_fkey(full_name),
+      services(name, description, is_active)
+    `)
+    .eq("is_active", true);
+
+  const barberContext: BarberConsultContext[] = (barbers ?? []).map((barber) => {
+    const profile = Array.isArray(barber.profiles) ? barber.profiles[0] : barber.profiles;
+    const services = Array.isArray(barber.services) ? barber.services : [];
+
+    return {
+      id: barber.id,
+      shopName: barber.shop_name,
+      barberName: (profile as { full_name: string | null } | null | undefined)?.full_name ?? null,
+      bio: barber.bio,
+      location: barber.location,
+      services: services
+        .filter((service) => service.is_active)
+        .map((service) => ({ name: service.name, description: service.description })),
+    };
+  });
+
   try {
-    const response = await getStyleConsultation(userPrompt);
+    const rawResponse = await getStyleConsultation(userPrompt, barberContext);
+    const { text: response, barberId: recommendedBarberId } = parseRecommendedBarberId(rawResponse);
+    const recommendedBarber = barberContext.find((barber) => barber.id === recommendedBarberId);
 
     await supabase.from("ai_consultations").insert({
       user_id: user.id,
@@ -81,6 +116,8 @@ export async function POST(request: Request) {
         id: crypto.randomUUID(),
         response,
         remaining: limit - requestsToday - 1,
+        recommendedBarberId: recommendedBarber?.id ?? null,
+        recommendedBarberName: recommendedBarber?.shopName ?? null,
       },
     });
   } catch (error) {

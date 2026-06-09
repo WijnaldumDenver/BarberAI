@@ -11,11 +11,11 @@ interface ConsultPageClientProps {
 }
 
 export function ConsultPageClient({ remaining, consultations }: ConsultPageClientProps) {
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<ConsultResponse | null>(null);
   const [remainingCount, setRemainingCount] = useState(remaining);
 
   const handleResult = (data: ConsultResponse) => {
-    setResult(data.response);
+    setResult(data);
     setRemainingCount(data.remaining);
   };
 
@@ -24,7 +24,11 @@ export function ConsultPageClient({ remaining, consultations }: ConsultPageClien
       <ConsultationForm remaining={remainingCount} onResult={handleResult} />
       {result && (
         <div className="mt-6">
-          <ConsultationResult response={result} />
+          <ConsultationResult
+            response={result.response}
+            recommendedBarberId={result.recommendedBarberId}
+            recommendedBarberName={result.recommendedBarberName}
+          />
         </div>
       )}
       <ConsultationHistory consultations={consultations} />
