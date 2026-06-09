@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BarberAI
 
-## Getting Started
+BarberAI is an AI-powered barbershop booking and style consultation platform. Clients can book appointments and get personalized style recommendations before their visit; barbers can manage services, availability, and grow with a Pro subscription.
 
-First, run the development server:
+**Live demo:** _Add your Vercel URL after deployment_
+
+![BarberAI screenshot](./public/screenshot.svg)
+
+## Features
+
+- **Smart booking** — Browse barbers, pick a service, choose a time slot, and confirm
+- **AI style consultation** — Get Claude-powered style advice with "what to tell your barber" wording
+- **Barber dashboard** — Manage services, availability, and today's appointments
+- **Role-based auth** — Separate client and barber experiences via Supabase Auth
+- **Stripe subscriptions** — Pro plan upgrade (test mode only)
+- **Avatar uploads** — Profile photos via Cloudinary free tier
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | [Next.js 14](https://nextjs.org/) (App Router) |
+| Language | [TypeScript](https://www.typescriptlang.org/) (strict) |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
+| Database + Auth | [Supabase](https://supabase.com/) |
+| AI | [Anthropic Claude Haiku](https://www.anthropic.com/) |
+| Payments | [Stripe](https://stripe.com/) (test mode) |
+| Images | [Cloudinary](https://cloudinary.com/) |
+| State | [Zustand](https://zustand.docs.pmnd.rs/) + [React Query](https://tanstack.com/query) |
+| Forms | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Deployment | [Vercel](https://vercel.com/) |
+
+## Local Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+git clone <your-repo-url>
+cd RazorAI
+pnpm install
+cp .env.example .env.local
+# Fill in .env.local — see SETUP.md for detailed instructions
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> See [SETUP.md](./SETUP.md) for step-by-step account creation (Supabase, Anthropic, Stripe, Cloudinary).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture Decisions
 
-## Learn More
+**Why Supabase?** Single platform for PostgreSQL, auth, and row-level security — free tier covers a portfolio project with zero backend code to maintain.
 
-To learn more about Next.js, take a look at the following resources:
+**Why Claude Haiku?** Cheapest Anthropic model (`claude-haiku-3-5-20251001`) with fast responses under 500 tokens. Daily limits (5 free / 50 pro) keep API costs near zero.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Why Cloudinary over Supabase Storage?** Supabase free tier has 1 GB storage; Cloudinary's separate 1 GB free tier is reserved for avatar uploads only, keeping the database storage budget intact.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Why edge runtime?** Lightweight API routes (bookings, barbers) run on Vercel edge for sub-10s execution. AI and Stripe webhook routes use Node.js runtime for SDK compatibility.
 
-## Deploy on Vercel
+## Free Tier Breakdown ($0/month)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Service | Free Tier | Usage |
+|---------|-----------|-------|
+| Vercel | 100 GB bandwidth, serverless functions | Hosting + API routes |
+| Supabase | 500 MB DB, 50k MAU, auth emails | Database, auth, RLS |
+| Anthropic Haiku | Pay-per-use (~$0.001/consult) | Capped at 5–50/day per user |
+| Stripe | Test mode | No real charges |
+| Cloudinary | 1 GB storage, 25 credits/month | Avatar uploads only |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Total running cost: $0** on free tiers. Anthropic charges only if you exceed their free credits (minimal at Haiku rates with daily caps).
+
+## Project Structure
+
+```
+app/                  → Pages and API routes
+components/           → UI and feature components
+lib/                  → Supabase, Stripe, Anthropic, utilities
+supabase/migrations/  → Database schema SQL
+```
+
+## Scripts
+
+```bash
+pnpm dev      # Start development server
+pnpm build    # Production build
+pnpm start    # Start production server
+pnpm lint     # Run ESLint
+```
