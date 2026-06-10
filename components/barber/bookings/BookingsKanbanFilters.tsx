@@ -210,7 +210,7 @@ export function BookingsKanbanFilters({
             onClick={() => {
               const statuses = showFinished
                 ? filters.statuses.filter((s) => s !== "completed")
-                : [...new Set([...filters.statuses, "completed"])];
+                : Array.from(new Set([...filters.statuses, "completed" as const]));
               onChange({
                 ...filters,
                 statuses: statuses.length > 0 ? statuses : [...DEFAULT_KANBAN_STATUSES],
@@ -226,7 +226,7 @@ export function BookingsKanbanFilters({
             onClick={() => {
               const statuses = showCancelled
                 ? filters.statuses.filter((s) => s !== "cancelled")
-                : [...new Set([...filters.statuses, "cancelled"])];
+                : Array.from(new Set([...filters.statuses, "cancelled" as const]));
               onChange({
                 ...filters,
                 statuses: statuses.length > 0 ? statuses : [...DEFAULT_KANBAN_STATUSES],

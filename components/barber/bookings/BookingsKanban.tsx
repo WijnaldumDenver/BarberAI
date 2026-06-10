@@ -82,12 +82,7 @@ export function BookingsKanban({ initialBookings, services }: BookingsKanbanProp
     ? bookings.find((b) => b.id === activeId) ?? null
     : null;
 
-  const updateMutation = useMutation<
-    { id: string; status: BookingStatus },
-    Error,
-    { id: string; status: BookingStatus },
-    { previous: KanbanBooking[] }
-  >({
+  const updateMutation = useMutation({
     mutationFn: async ({
       id,
       status,
@@ -104,21 +99,8 @@ export function BookingsKanban({ initialBookings, services }: BookingsKanbanProp
       if (!res.ok) throw new Error(json.error ?? "Failed to update booking");
       return { id, status };
     },
-    onSuccess: ({ id, status }) => {
-      setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status } : b))
-      );
+    onSuccess: ({ status }) => {
       toast({ title: "Booking updated", description: `Moved to ${status}` });
-    },
-    onError: (error: Error, _variables, context) => {
-      if (context?.previous) {
-        setBookings(context.previous);
-      }
-      toast({
-        title: "Update failed",
-        description: error.message,
-        variant: "destructive",
-      });
     },
   });
 
@@ -143,7 +125,16 @@ export function BookingsKanban({ initialBookings, services }: BookingsKanbanProp
     );
     updateMutation.mutate(
       { id: bookingId, status: newStatus },
-      { context: { previous } }
+      {
+        onError: (error) => {
+          setBookings(previous);
+          toast({
+            title: "Update failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        },
+      }
     );
   };
 
