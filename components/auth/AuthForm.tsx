@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { createClient } from "@/lib/supabase/client";
+import { getDashboardPath } from "@/lib/auth";
 import { loginSchema, signupSchema, type LoginInput, type SignupInput } from "@/lib/validations";
 import { useToast } from "@/hooks/use-toast";
 import type { UserRole } from "@/lib/types";
@@ -54,7 +55,7 @@ export function AuthForm({ mode, defaultRole = "client" }: AuthFormProps) {
       .select("role")
       .single();
 
-    router.push(profile?.role === "barber" ? "/dashboard/barber" : "/dashboard/client");
+    router.push(getDashboardPath((profile?.role as UserRole) ?? "client"));
     router.refresh();
   };
 
@@ -79,7 +80,7 @@ export function AuthForm({ mode, defaultRole = "client" }: AuthFormProps) {
     }
 
     toast({ title: "Account created!", description: "Welcome to BarberAI." });
-    router.push(data.role === "barber" ? "/dashboard/barber" : "/dashboard/client");
+    router.push(getDashboardPath(data.role));
     router.refresh();
   };
 

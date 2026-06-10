@@ -1,11 +1,26 @@
 import Link from "next/link";
 import { Scissors } from "lucide-react";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Button } from "@/components/ui/button";
+import { getDashboardPath } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import type { UserRole } from "@/lib/types";
 
 export async function Navbar() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  let role: UserRole | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    role = (profile?.role as UserRole) ?? null;
+  }
+
+  const dashboardPath = role ? getDashboardPath(role) : "/dashboard";
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -15,18 +30,36 @@ export async function Navbar() {
           BarberAI
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/barbers" className="text-muted-foreground hover:text-foreground transition-colors">
-            Find a Barber
-          </Link>
+          {user && role === "client" && (
+            <Link href="/barbers" className="text-muted-foreground hover:text-foreground transition-colors">
+              Find a Barber
+            </Link>
+          )}
+          {user && role === "barber" && (
+            <Link
+              href="/dashboard/barber/services"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              My services
+            </Link>
+          )}
+          {!user && (
+            <Link href="/barbers" className="text-muted-foreground hover:text-foreground transition-colors">
+              Find a Barber
+            </Link>
+          )}
           <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </Link>
         </nav>
         <div className="flex items-center gap-3">
           {user ? (
-            <Button asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
+            <>
+              <Button asChild variant="outline">
+                <Link href={dashboardPath}>Dashboard</Link>
+              </Button>
+              <LogoutButton />
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>
