@@ -29,7 +29,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   const links = role === "barber" ? barberLinks : clientLinks;
 
   return (
-    <aside className="w-64 border-r min-h-[calc(100vh-4rem)] p-4 hidden md:block">
+    <aside className="w-64 border-r border-border/60 bg-card/30 backdrop-blur-sm min-h-[calc(100vh-4rem)] p-4 hidden md:block">
       <nav className="space-y-1">
         {links.map((link) => {
           const Icon = link.icon;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { getDashboardPath } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -23,11 +24,13 @@ export async function Navbar() {
   const dashboardPath = role ? getDashboardPath(role) : "/dashboard";
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b border-border/60 surface-glass supports-[backdrop-filter]:bg-card/70">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <Scissors className="h-6 w-6" />
-          BarberAI
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl group">
+          <Scissors className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
+          <span>
+            Barber<span className="text-primary">AI</span>
+          </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {user && role === "client" && (
@@ -52,7 +55,8 @@ export async function Navbar() {
             Pricing
           </Link>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <>
               <Button asChild variant="outline">

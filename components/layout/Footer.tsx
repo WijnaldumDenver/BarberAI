@@ -21,7 +21,7 @@ export async function Footer() {
   const dashboardPath = role ? getDashboardPath(role) : "/dashboard";
 
   return (
-    <footer className="border-t py-12 mt-auto">
+    <footer className="border-t border-border/60 surface-glass py-12 mt-auto">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>

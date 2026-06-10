@@ -49,6 +49,12 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
+      boxShadow: {
+        glow: "0 0 40px -10px hsl(var(--primary) / 0.35)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

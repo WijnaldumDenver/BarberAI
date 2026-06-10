@@ -45,10 +45,14 @@ export default async function HomePage() {
       <Navbar />
       <main className="flex-1">
         <section className="container mx-auto px-4 py-24 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm text-primary mb-8">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-powered barbershop platform
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
             Book your next cut.
             <br />
-            <span className="text-muted-foreground">Get AI style advice before you sit down.</span>
+            <span className="text-gradient">Get AI style advice before you sit down.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             BarberAI connects you with top barbers and gives you AI-powered style recommendations
@@ -72,7 +76,7 @@ export default async function HomePage() {
               return (
                 <Card key={feature.title}>
                   <CardHeader>
-                    <Icon className="h-10 w-10 mb-2" />
+                    <Icon className="h-10 w-10 mb-2 text-primary" />
                     <CardTitle>{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -85,7 +89,7 @@ export default async function HomePage() {
         </section>
 
         {featuredBarbers.length > 0 && (
-          <section className="container mx-auto px-4 py-16 bg-muted/30">
+          <section className="container mx-auto px-4 py-16 rounded-2xl border border-border/40 bg-muted/20 backdrop-blur-sm">
             <h2 className="text-3xl font-bold text-center mb-12">Featured barbers</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {featuredBarbers.map((barber) => (
