@@ -125,9 +125,14 @@ export default async function BarberDashboardPage({
         />
       </div>
 
-      <Button variant="outline" asChild>
-        <Link href="/dashboard/barber/services">Manage services</Link>
-      </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href="/dashboard/barber/bookings">View all bookings</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/barber/services">Manage services</Link>
+          </Button>
+        </div>
     </div>
   );
 }

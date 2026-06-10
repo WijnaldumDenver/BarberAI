@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Clock, LayoutDashboard, Scissors, Sparkles, Wrench } from "lucide-react";
+import { Calendar, Clock, Kanban, LayoutDashboard, Scissors, Sparkles, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
 
@@ -18,6 +18,7 @@ const clientLinks = [
 
 const barberLinks = [
   { href: "/dashboard/barber", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/barber/bookings", label: "Bookings", icon: Kanban },
   { href: "/dashboard/barber/services", label: "Services", icon: Wrench },
   { href: "/dashboard/barber/availability", label: "Availability", icon: Clock },
   { href: "/dashboard/barber/upgrade", label: "Upgrade", icon: Scissors },

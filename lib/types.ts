@@ -100,3 +100,22 @@ export interface ConsultResponse {
 export interface CheckoutResponse {
   url: string;
 }
+
+export interface KanbanBooking {
+  id: string;
+  scheduledAt: string;
+  createdAt: string;
+  status: BookingStatus;
+  notes: string | null;
+  serviceId: string;
+  serviceName: string;
+  priceCents: number;
+  durationMinutes: number;
+  clientName: string;
+  clientEmail: string | null;
+}
+
+export interface ServiceOption {
+  id: string;
+  name: string;
+}
