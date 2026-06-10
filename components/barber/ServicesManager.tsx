@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -20,8 +20,13 @@ interface ServicesManagerProps {
 }
 
 export function ServicesManager({ services }: ServicesManagerProps) {
-  const router = useRouter();
   const { toast } = useToast();
+  const [items, setItems] = useState(services);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setItems(services);
+  }, [services]);
 
   const form = useForm<ServiceInput>({
     resolver: zodResolver(serviceSchema),
@@ -37,12 +42,12 @@ export function ServicesManager({ services }: ServicesManagerProps) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to create service");
-      return json;
+      return json.data as Service;
     },
-    onSuccess: () => {
+    onSuccess: (service) => {
       toast({ title: "Service added" });
       form.reset();
-      router.refresh();
+      setItems((prev) => [...prev, service]);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -51,17 +56,20 @@ export function ServicesManager({ services }: ServicesManagerProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setDeletingId(id);
       const res = await fetch(`/api/services?id=${id}`, { method: "DELETE" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to delete service");
-      return json;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       toast({ title: "Service removed" });
-      router.refresh();
+      setItems((prev) => prev.filter((s) => s.id !== id));
+      setDeletingId(null);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+      setDeletingId(null);
     },
   });
 
@@ -116,10 +124,10 @@ export function ServicesManager({ services }: ServicesManagerProps) {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Your services</h2>
-        {services.length === 0 ? (
+        {items.length === 0 ? (
           <p className="text-muted-foreground">No services yet. Add your first service above.</p>
         ) : (
-          services.map((service) => (
+          items.map((service) => (
             <Card key={service.id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div>
@@ -132,7 +140,7 @@ export function ServicesManager({ services }: ServicesManagerProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => deleteMutation.mutate(service.id)}
-                  disabled={deleteMutation.isPending}
+                  disabled={deletingId === service.id}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

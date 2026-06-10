@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConsultationForm } from "@/components/ai/ConsultationForm";
 import { ConsultationResult, ConsultationHistory } from "@/components/ai/ConsultationResult";
 import type { AiConsultation, ConsultResponse } from "@/lib/types";
@@ -13,10 +13,24 @@ interface ConsultPageClientProps {
 export function ConsultPageClient({ remaining, consultations }: ConsultPageClientProps) {
   const [result, setResult] = useState<ConsultResponse | null>(null);
   const [remainingCount, setRemainingCount] = useState(remaining);
+  const [history, setHistory] = useState(consultations);
+
+  useEffect(() => {
+    setHistory(consultations);
+  }, [consultations]);
 
   const handleResult = (data: ConsultResponse) => {
     setResult(data);
     setRemainingCount(data.remaining);
+
+    const entry: AiConsultation = {
+      id: data.id,
+      user_id: "",
+      prompt: data.prompt ?? "",
+      response: data.response,
+      created_at: data.createdAt ?? new Date().toISOString(),
+    };
+    setHistory((prev) => [entry, ...prev]);
   };
 
   return (
@@ -31,7 +45,7 @@ export function ConsultPageClient({ remaining, consultations }: ConsultPageClien
           />
         </div>
       )}
-      <ConsultationHistory consultations={consultations} />
+      <ConsultationHistory consultations={history} />
     </div>
   );
 }

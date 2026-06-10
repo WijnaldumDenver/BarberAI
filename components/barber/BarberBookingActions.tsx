@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -9,10 +8,10 @@ import type { BookingStatus } from "@/lib/types";
 interface BarberBookingActionsProps {
   bookingId: string;
   status: BookingStatus;
+  onStatusChange?: (bookingId: string, status: BookingStatus) => void;
 }
 
-export function BarberBookingActions({ bookingId, status }: BarberBookingActionsProps) {
-  const router = useRouter();
+export function BarberBookingActions({ bookingId, status, onStatusChange }: BarberBookingActionsProps) {
   const { toast } = useToast();
 
   const mutation = useMutation({
@@ -24,11 +23,11 @@ export function BarberBookingActions({ bookingId, status }: BarberBookingActions
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Update failed");
-      return json;
+      return newStatus;
     },
-    onSuccess: () => {
+    onSuccess: (newStatus) => {
       toast({ title: "Booking updated" });
-      router.refresh();
+      onStatusChange?.(bookingId, newStatus);
     },
     onError: (error: Error) => {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });

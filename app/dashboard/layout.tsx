@@ -4,11 +4,11 @@ import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 import { createClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/types";
 
-interface DashboardLayoutProps {
+export default async function DashboardLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export async function DashboardLayout({ children }: DashboardLayoutProps) {
+}) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

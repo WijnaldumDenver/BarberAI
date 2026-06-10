@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Calendar, Sparkles } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { BookingCard } from "@/components/booking/BookingCard";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -38,8 +37,7 @@ export default async function ClientDashboardPage() {
     .order("scheduled_at", { ascending: true });
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
+    <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold">Your dashboard</h1>
           <p className="text-muted-foreground mt-1">
@@ -84,7 +82,6 @@ export default async function ClientDashboardPage() {
             </div>
           )}
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

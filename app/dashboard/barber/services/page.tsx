@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ServicesManager } from "@/components/barber/ServicesManager";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,12 +19,10 @@ export default async function ServicesPage() {
     .order("name");
 
   return (
-    <DashboardLayout>
-      <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold mb-2">Manage services</h1>
-        <p className="text-muted-foreground mb-8">Add and manage the services you offer.</p>
-        <ServicesManager services={services ?? []} />
-      </div>
-    </DashboardLayout>
+    <div className="max-w-2xl">
+      <h1 className="text-3xl font-bold mb-2">Manage services</h1>
+      <p className="text-muted-foreground mb-8">Add and manage the services you offer.</p>
+      <ServicesManager services={services ?? []} />
+    </div>
   );
 }

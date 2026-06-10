@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { createClient } from "@/lib/supabase/server";
@@ -25,8 +24,7 @@ export default async function UpgradePage() {
   const isPro = profile?.plan === "pro";
 
   return (
-    <DashboardLayout>
-      <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto">
         <h1 className="text-3xl font-bold mb-2">Upgrade to Pro</h1>
         <p className="text-muted-foreground mb-8">
           Grow your barbershop with premium features.
@@ -67,7 +65,6 @@ export default async function UpgradePage() {
         <p className="text-center text-sm text-muted-foreground mt-4">
           Stripe test mode — use card 4242 4242 4242 4242
         </p>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

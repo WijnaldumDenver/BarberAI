@@ -91,6 +91,8 @@ export interface ConsultResponse {
   id: string;
   response: string;
   remaining: number;
+  prompt?: string;
+  createdAt?: string;
   recommendedBarberId?: string | null;
   recommendedBarberName?: string | null;
 }

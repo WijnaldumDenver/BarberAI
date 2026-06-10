@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ConsultPageClient } from "@/components/ai/ConsultPageClient";
 import { createClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
@@ -35,14 +34,12 @@ export default async function ConsultPage() {
     .limit(10);
 
   return (
-    <DashboardLayout>
-      <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold mb-2">AI Style Consultation</h1>
-        <p className="text-muted-foreground mb-8">
-          Describe your ideal look and get personalized advice before your appointment.
-        </p>
-        <ConsultPageClient remaining={remaining} consultations={consultations ?? []} />
-      </div>
-    </DashboardLayout>
+    <div className="max-w-2xl">
+      <h1 className="text-3xl font-bold mb-2">AI Style Consultation</h1>
+      <p className="text-muted-foreground mb-8">
+        Describe your ideal look and get personalized advice before your appointment.
+      </p>
+      <ConsultPageClient remaining={remaining} consultations={consultations ?? []} />
+    </div>
   );
 }

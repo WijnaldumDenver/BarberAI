@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -20,8 +20,13 @@ interface AvailabilityManagerProps {
 }
 
 export function AvailabilityManager({ availability }: AvailabilityManagerProps) {
-  const router = useRouter();
   const { toast } = useToast();
+  const [items, setItems] = useState(availability);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setItems(availability);
+  }, [availability]);
 
   const form = useForm<AvailabilityInput>({
     resolver: zodResolver(availabilitySchema),
@@ -37,12 +42,12 @@ export function AvailabilityManager({ availability }: AvailabilityManagerProps) 
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to add availability");
-      return json;
+      return json.data as BarberAvailability;
     },
-    onSuccess: () => {
+    onSuccess: (slot) => {
       toast({ title: "Availability added" });
       form.reset({ dayOfWeek: 1, startTime: "09:00", endTime: "17:00" });
-      router.refresh();
+      setItems((prev) => [...prev, slot]);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -51,17 +56,20 @@ export function AvailabilityManager({ availability }: AvailabilityManagerProps) 
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      setDeletingId(id);
       const res = await fetch(`/api/availability?id=${id}`, { method: "DELETE" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to remove availability");
-      return json;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       toast({ title: "Availability removed" });
-      router.refresh();
+      setItems((prev) => prev.filter((s) => s.id !== id));
+      setDeletingId(null);
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+      setDeletingId(null);
     },
   });
 
@@ -116,10 +124,10 @@ export function AvailabilityManager({ availability }: AvailabilityManagerProps) 
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Current schedule</h2>
-        {availability.length === 0 ? (
+        {items.length === 0 ? (
           <p className="text-muted-foreground">No availability set. Add your working hours above.</p>
         ) : (
-          availability.map((slot) => (
+          items.map((slot) => (
             <Card key={slot.id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div>
@@ -132,7 +140,7 @@ export function AvailabilityManager({ availability }: AvailabilityManagerProps) 
                   variant="ghost"
                   size="icon"
                   onClick={() => deleteMutation.mutate(slot.id)}
-                  disabled={deleteMutation.isPending}
+                  disabled={deletingId === slot.id}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

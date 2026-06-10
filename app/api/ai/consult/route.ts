@@ -100,11 +100,22 @@ export async function POST(request: Request) {
     const { text: response, barberId: recommendedBarberId } = parseRecommendedBarberId(rawResponse);
     const recommendedBarber = barberContext.find((barber) => barber.id === recommendedBarberId);
 
-    await supabase.from("ai_consultations").insert({
-      user_id: user.id,
-      prompt: desiredStyle,
-      response,
-    });
+    const { data: consultation, error: insertError } = await supabase
+      .from("ai_consultations")
+      .insert({
+        user_id: user.id,
+        prompt: desiredStyle,
+        response,
+      })
+      .select()
+      .single();
+
+    if (insertError || !consultation) {
+      return NextResponse.json<ApiError>(
+        { error: insertError?.message ?? "Failed to save consultation" },
+        { status: 500 }
+      );
+    }
 
     await supabase
       .from("profiles")
@@ -113,8 +124,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json<ApiSuccess<ConsultResponse>>({
       data: {
-        id: crypto.randomUUID(),
+        id: consultation.id,
         response,
+        prompt: consultation.prompt,
+        createdAt: consultation.created_at,
         remaining: limit - requestsToday - 1,
         recommendedBarberId: recommendedBarber?.id ?? null,
         recommendedBarberName: recommendedBarber?.shopName ?? null,

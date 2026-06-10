@@ -74,7 +74,6 @@ export function BookingForm({
     onSuccess: () => {
       toast({ title: "Booking confirmed!", description: "Your appointment has been scheduled." });
       router.push("/dashboard/client");
-      router.refresh();
     },
     onError: (error: Error) => {
       toast({ title: "Booking failed", description: error.message, variant: "destructive" });

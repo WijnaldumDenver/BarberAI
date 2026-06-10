@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AvailabilityManager } from "@/components/barber/AvailabilityManager";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,14 +19,12 @@ export default async function AvailabilityPage() {
     .order("start_time");
 
   return (
-    <DashboardLayout>
-      <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold mb-2">Set availability</h1>
-        <p className="text-muted-foreground mb-8">
-          Define when clients can book appointments with you.
-        </p>
-        <AvailabilityManager availability={availability ?? []} />
-      </div>
-    </DashboardLayout>
+    <div className="max-w-2xl">
+      <h1 className="text-3xl font-bold mb-2">Set availability</h1>
+      <p className="text-muted-foreground mb-8">
+        Define when clients can book appointments with you.
+      </p>
+      <AvailabilityManager availability={availability ?? []} />
+    </div>
   );
 }
